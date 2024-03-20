@@ -1,10 +1,11 @@
 const express = require("express")
 const {BookModel} = require("../model/bookModel")
 const {access} = require("../middleware/accessMiddleware")
+const { auth } = require("../middleware/authMiddleware")
 
 const bookRouter = express.Router()
 
-bookRouter.post("/",access,async(req,res)=>{
+bookRouter.post("/",auth,access,async(req,res)=>{
     try {
         const{title,author,category,price,quantity} = req.body;
         const book = new BookModel({
@@ -34,12 +35,14 @@ bookRouter.post("/",access,async(req,res)=>{
 
     bookRouter.get("/:bookId",async(req,res)=>{
         const {bookId} = req.params
+    
         try {
-            await BookModel.findOne({_id:bookId})
+            const book = await BookModel.findOne({_id:bookId})
+            // console.log(book)
             if (!book) {
                 return res.status(404).json({ msg: `Book with ID ${bookId} not found` });
             }
-            res.status(200).json({ msg: `The book with ID ${id}`, book });
+            res.status(200).json({ msg: `The book with ID ${bookId}`, book });
     
         } catch (error) {
             res.status(400).send({"error":error})
@@ -89,10 +92,11 @@ bookRouter.get("/", async (req, res) => {
 
     //put patch
 
-    bookRouter.patch("/:bookId",async(req,res)=>{
+    bookRouter.patch("/:bookId",auth,access,async(req,res)=>{
         const{bookId} = req.params
+        const payload = req.body
         try {
-            await BookModel.findByIdAndUpdate({_id:bookId},req.body)
+            await BookModel.findByIdAndUpdate({_id:bookId},payload)
             res.status(204).send({"msg":`the book with Id:${bookId} has been updated`})
             
         } catch (error) {
@@ -105,8 +109,9 @@ bookRouter.get("/", async (req, res) => {
 
     bookRouter.delete("/:bookId",async(req,res)=>{
         const{bookId} = req.params
+        const payload = req.body
         try {
-            await BookModel.findByIdAndDelete({_id:bookId},req.body)
+            await BookModel.findByIdAndDelete({_id:bookId},payload)
             res.status(202).send({"msg":`the book with Id:${bookId} has been deleted`})
             
         } catch (error) {

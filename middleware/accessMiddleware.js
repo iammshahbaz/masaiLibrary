@@ -16,10 +16,11 @@ const { UserModel } = require('../model/userModel');
 //     access
 // }
 const access = (req, res, next) => {
-    if (req.user && req.user.isAdmin) {
+    if (req.user.isAdmin) {
+        console.log(req.user.isAdmin)
         next(); 
     } else {
-        res.status(403).json({ msg: "You have no access" }); 
+        res.status(403).send({ msg: "You have no access" }); 
     }
 };
   module.exports={access}
